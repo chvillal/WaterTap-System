@@ -1,9 +1,9 @@
 /* 
- *  name:   sensor.cpp
+ *  name:   sensor.ino
  *  board:  Feather M0
  *  
- *  authors:
- *  emails:
+ *  authors:  christopher villalpando, andrea david
+ *  emails:   chvillal@ucsc.edu, andavid@ucsc.edu
  * 
  */
 
@@ -18,13 +18,15 @@
 #define RF95_FREQ 902.0
 #define RF95_PWR  5
 
+/* Single instance of the radio driver */
+RH_RF95 rf95(RFM95_CS, RFM95_INT);
+
 void setup() {
   // put your setup code here, to run once:
-
   while (!Serial);
   Serial.begin(9600);
-
-  lora_init();
+  
+  lora_init();  
 }
 
 void loop() {
