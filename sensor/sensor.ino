@@ -64,5 +64,4 @@ void lora_init(void)
   // The default transmitter power is 13dBm, using PA_BOOST.
   // set transmitter powers from 5 to 23 dBm:
   rf95.setTxPower(RF95_PWR, false);
-
-
+}
