@@ -1,10 +1,12 @@
-/* 
- *  name:   sensor.ino
- *  board:  Feather M0
- *  
- *  authors:  christopher villalpando, andrea david
- *  emails:   chvillal@ucsc.edu, andavid@ucsc.edu
+/*
+ * name:   sensor.ino
+ * board:  Feather M0
+ *
+ * authors:  christopher villalpando, andrea david
+ * emails:   chvillal@ucsc.edu, andavid@ucsc.edu
  * 
+ * description:
+ *
  */
 
 /* LIBRARIES */
@@ -25,8 +27,8 @@ void setup() {
   // put your setup code here, to run once:
   while (!Serial);
   Serial.begin(9600);
-  
-  lora_init();  
+
+  lora_init();
 }
 
 void loop() {
@@ -36,7 +38,7 @@ void loop() {
 
 void lora_init(void)
 {
-  //declare LoRa reset pin
+  //LoRa reset pin
   pinMode(RFM95_RST, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
 
