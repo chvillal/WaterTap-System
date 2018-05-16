@@ -20,6 +20,14 @@
 #define RF95_FREQ 902.0
 #define RF95_PWR  5
 
+/* GLOBAL VARIABLES */
+enum states {
+  INIT,
+  SENSE,
+  SLEEP
+} topStateMachine;
+
+
 /* Single instance of the radio driver */
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
@@ -29,11 +37,31 @@ void setup() {
   Serial.begin(9600);
 
   lora_init();
+
+  topStateMachine = SENSE;
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
 
+  switch (topStateMachine) {
+    case INIT:
+      break;
+
+    case SENSE:
+      //read sensor
+      //compute metrics
+      //manage events
+      //tx_msg
+      //rx_msg
+      break;
+
+    case SLEEP:
+      break;
+
+    default:
+      break;
+  }
 }
 
 void lora_init(void)
