@@ -22,7 +22,7 @@ void setup() {
   while(!Serial);
   Serial.begin(9600);
 
-  Serial.print("Feather M0 Board - flowmeter test");
+  Serial.println("Feather M0 Board - flowmeter test");
   
   pinMode(FLOWMETER, INPUT);
   digitalWrite(FLOWMETER, HIGH);
@@ -64,7 +64,6 @@ void event_checker(void){
       Serial.println("FLOW EVENT STARTED");
       lastPinChange = current_t;
       flowing = true;
-      volume = 0;
       lastPinState = pinState;
       return;
     }
@@ -73,14 +72,16 @@ void event_checker(void){
     pinDelta = pinChange - lastPinChange;
 
     if (pinDelta < 1000){
-      hertz = 1000/pinDelta;
+      hertz = 1000.0000 /pinDelta;
       flowRate = hertz/(60*7.5); // L/s
-      volume += flowRate*(pinDelta/1000);
+      volume += flowRate*(pinDelta/1000.0000);
     }
-  }
-  
-  if (flowing == true && pinState == lastPinState && (current_t - lastPinChange) > 3000){
+
+    lastPinChange = pinChange;
+   
+  } else if (flowing == true && pinState == lastPinState && (current_t - lastPinChange) > 3000){
     flowing = false;
+    volume = 0;
     Serial.println("FLOW EVENT FINISHED");
   }
 
