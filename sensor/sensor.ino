@@ -20,6 +20,8 @@
 #define RF95_FREQ 902.0
 #define RF95_PWR  5
 
+#define LEDPIN  13
+
 /* GLOBAL VARIABLES */
 enum states {
   INIT,
@@ -37,7 +39,6 @@ void setup() {
   Serial.begin(9600);
 
   lora_init();
-
   topStateMachine = SENSE;
 }
 

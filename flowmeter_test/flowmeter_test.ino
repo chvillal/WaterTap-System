@@ -1,6 +1,16 @@
-//flow meter test.
+// flow meter test
+// 
+// Connect flowmeter sensor to power, gnd, and signal to  pin A2
+//
+// this sketch tests operation of the flowmeter sensor. prints metrics
+// to serial COM monitor.
+//
+// authors:       christopher villalpando, andrea david
+// emails:        chvillal@ucsc.edu, andavid@ucsc.edu
+// last-modified: 5/21/2018
 
 #define FLOWMETER A2
+#define LEDPIN    13
 
 volatile uint8_t lastflowmeterpinstate;
 unsigned long current_t;
@@ -23,6 +33,9 @@ void setup() {
   Serial.begin(9600);
 
   Serial.println("Feather M0 Board - flowmeter test");
+
+  pinMode(LEDPIN,OUTPUT); //LED SETUP
+  digitalWrite(LEDPIN, LOW);
   
   pinMode(FLOWMETER, INPUT);
   digitalWrite(FLOWMETER, HIGH);
@@ -34,16 +47,17 @@ void setup() {
 }
 
 void loop() {
+
+  /* simulates 1 ms interrupt, run event checker */
   current_t = millis();
   if ( current_t >= nextPinCheck ){
     nextPinCheck++;
     event_checker();
   }
 
-
+  /* if flowing state active, print metrics every 1s */
   if ( current_t >= nextSerialUpdate ){
     nextSerialUpdate += 1000;
-
     if (flowing == true){
       Serial.println("FLOW UPDATE");
       Serial.print("Flow: ");
@@ -52,6 +66,7 @@ void loop() {
       Serial.println(volume);
     }
   }  
+  
 }
 
 void event_checker(void){
@@ -65,6 +80,7 @@ void event_checker(void){
       lastPinChange = current_t;
       flowing = true;
       lastPinState = pinState;
+      digitalWrite(LEDPIN, HIGH);
       return;
     }
 
@@ -83,6 +99,7 @@ void event_checker(void){
     flowing = false;
     volume = 0;
     Serial.println("FLOW EVENT FINISHED");
+    digitalWrite(LEDPIN, LOW);
   }
 
   lastPinState = pinState;
