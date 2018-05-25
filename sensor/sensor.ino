@@ -40,9 +40,9 @@ unsigned long pinDelta;
 unsigned long nextPinCheck;
 unsigned long nextSerialUpdate;
 uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
-uint8_t msg[RH_RF95_MAX_MESSAGE_LEN] = "THIS IS A SENSOR PACKET" ; //PLACEHOLDER ***
+uint8_t msg[RH_RF95_MAX_MESSAGE_LEN] = "SENSOR PACKET" ; //PLACEHOLDER ***
 uint8_t buf_len;
-uint8_t msg_len;
+uint8_t msg_len = 14;
 uint8_t sendPacket;
 float volume;
 float flowRate;
@@ -188,7 +188,6 @@ void manager_init(void){
   nextSerialUpdate = millis();
 
   buf_len = sizeof(buf);
-  msg_len = 24; //PLACEHOLDER *** ADJUST ONCE FLIP IS IMPLEMENTED
   sendPacket = 0; 
 }
 
@@ -210,6 +209,8 @@ void eventManager_task(void){
   if ( eventStart ){
     eventStart=false;
     sendPacket++;
+
+    Serial.println("CRAFTING START PACKET");
     //insert header+payload code here
     
   }
@@ -218,6 +219,8 @@ void eventManager_task(void){
   if ( eventEnd ) {
     eventEnd=false;
     sendPacket++;
+
+    Serial.println("CRAFTING END PACKET");
     //insert header+payload code here
     
   }  
@@ -226,13 +229,16 @@ void eventManager_task(void){
 void loraRadio_task(void){
   
   //if packets queued for transmission, send 1
-  if ( sendPacket < 1){
+  if ( sendPacket > 0){
     rf95.send((uint8_t *)msg, msg_len);
     sendPacket--;
-    //rf95.waitPacketSent();
+  
+    Serial.println("SENDING PACKET!");
+    rf95.waitPacketSent();
 
   //else, check if we received anything  
   } else if (rf95.recv(buf, &buf_len)) {
+    Serial.println("RECEIVED SOMETHING!");
     Serial.println((char*)buf);
   }
 }
