@@ -13,6 +13,10 @@
 #include <SPI.h>
 #include <RH_RF95.h>
 
+extern "C" {
+  #include <flip.h>
+}
+
 /* DEFINES */
 #define RFM95_CS  8
 #define RFM95_RST 4
