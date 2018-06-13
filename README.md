@@ -1,8 +1,13 @@
 # flowsensors
 WaterTap Sensors
 
-Hello! this is a test!
+Work in progress. Main code for the Feather M0 LoRa Boards.
 
-Will add skeleton code of server, client, and LoRa library!
-
-End.
+Code: init hwardware and protocols.
+      periodically checks sensor.
+        -If sensor active, begin measuring metrics periodically
+      save logs.
+      send log packet to sink.
+      
+      
+      
