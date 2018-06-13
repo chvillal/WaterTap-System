@@ -63,6 +63,7 @@ void setup() {
   while (!Serial);
   Serial.begin(9600);
 
+  flip_init();
   lora_init();
   sensor_init();
   manager_init();
@@ -206,6 +207,11 @@ void eventManager_task(void){
       Serial.println(flowRate);
       Serial.print("Volume: ");
       Serial.println(volume);
+
+      //String payloadType = String('A');
+      //String volume = String(volume);
+      //String duration
+      //Serial.println(payload);
     }
   }
 
@@ -216,6 +222,11 @@ void eventManager_task(void){
 
     Serial.println("CRAFTING START PACKET");
     //insert header+payload code here
+    char *payload = "EVENT-START";
+    char *bitmap = FLIP_construct_bitmap();
+    char *header = FLIP_construct_header();
+    char *packet = FLIP_construct_packet(bitmap,header,payload);
+    int packet_len = get_packet_length();
     
   }
 
@@ -234,7 +245,7 @@ void loraRadio_task(void){
   
   //if packets queued for transmission, send 1
   if ( sendPacket > 0){
-    rf95.send((uint8_t *)msg, msg_len);
+    rf95.send((uint8_t *) packet, packet_len);
     sendPacket--;
   
     Serial.println("SENDING PACKET!");
@@ -245,6 +256,17 @@ void loraRadio_task(void){
     Serial.println("RECEIVED SOMETHING!");
     Serial.println((char*)buf);
   }
+}
+
+void flip_init(void){
+  
+  // STATIC socket options
+  setsockopt(FLIPO_VERSION, 14, 0);
+  setsockopt(FLIPO_DESTINATION, 100, 4);
+  setsockopt(FLIPO_SOURCE, 220, 4);
+  setsockopt(FLIPO_PROTOCOL, 1, 0);
+  setsockopt(FLIPO_TTL, 8, 0);
+  
 }
 
 
