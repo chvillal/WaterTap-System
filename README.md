@@ -1,13 +1,11 @@
 # flowsensors
 WaterTap Sensors
 
+Wireless sensor nodes that measure water-flow events.
+
 Work in progress. Main code for the Feather M0 LoRa Boards.
 
-Code: 
-init hwardware and protocols.
-periodically checks sensor. if sensor active, begin measuring metrics periodically
-save logs.
-send log packet to sink.
-      
-      
+Project Funded by UCSC CIED IDEAhub.
+
+Submitted to CMPE 259 - Wireless Sensor Networks.
       
