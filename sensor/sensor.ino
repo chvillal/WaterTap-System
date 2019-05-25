@@ -64,12 +64,11 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 FlipKernel network;
 
 bool toSend(uint8_t* data, uint8_t len){
-  uint8_t data_len = len;
-  return rf95.send(data, &data_len);
+  return rf95.send(data, len);
 }
 
-bool toRead(uint8_t* buf, uint8_t buf_len){
-  return rf95.recv(buf, buf_len);
+bool toRead(uint8_t* buf, uint8_t* len){
+  return rf95.recv(buf, len);
 }
 
 void setup() {
@@ -282,6 +281,7 @@ void eventManager_task(void){
 //    tempPacket=packet;
 
     char *payload = "EVENT-ENDED";
+    
     network.write(s, payload, (int) strlen(payload) );
   }  
 }
@@ -298,10 +298,10 @@ void loraRadio_task(void){
   network.kernel();
 
   //else, check if we received anything  
-  if (rf95.recv(buf, &buf_len)) {
-    Serial.print("RECEIVED SOMETHING: ");
-    Serial.println((char*)buf);
-  }
+//  if (rf95.recv(buf, &buf_len)) {
+//    Serial.print("RECEIVED SOMETHING: ");
+//    Serial.println((char*)buf);
+//  }
 }
 
 

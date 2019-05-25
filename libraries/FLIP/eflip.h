@@ -9,8 +9,14 @@
 #ifndef eflip_h
 #define eflip_h
 
+//#define FLIP_LOCAL_TESTING
+
 /* LIBRARIES */
 #include <stdint.h>
+
+#ifdef FLIP_LOCAL_TESTING
+#include <iostream>
+#endif
 
 /* DEFINES */
 #define FLIP_ESP            0x400000
@@ -290,7 +296,7 @@ private:
     
 public:
     bool (*write_to_phy)(uint8_t*, uint8_t){};
-    bool (*read_from_phy)(uint8_t*, uint8_t){};
+    bool (*read_from_phy)(uint8_t*, uint8_t*){};
     
     //constructors
     FlipKernel()
@@ -303,14 +309,14 @@ public:
         //read_from_phy = NULL;
     }
     
-    FlipKernel( bool (*write)( uint8_t*, uint8_t), bool (*read)(uint8_t*, uint8_t))
+    FlipKernel( bool (*write)( uint8_t*, uint8_t), bool (*read)(uint8_t*, uint8_t*))
     {
         FlipKernel();
         init(write, read);
     }
     
     //initialize new kernel
-    void init( bool (*write)(uint8_t*, uint8_t), bool (*read)(uint8_t*, uint8_t));
+    void init( bool (*write)(uint8_t*, uint8_t), bool (*read)(uint8_t*, uint8_t*));
     //create new socket
     int socket();
     //set socket options
@@ -329,9 +335,11 @@ public:
 /* HELPER/PRIVATE FUNCTIONS */
 
 /* TEST FUNCTIONS */
+#ifdef FLIP_LOCAL_TESTING
 void print_metaheader(FlipSocket s);
 void print_metafields(FlipSocket s);
 void print_gtp_metaheader(GTPsocket g);
 void print_gtp_metafields(GTPsocket g);
+#endif
 
 #endif /* eflip_h */
