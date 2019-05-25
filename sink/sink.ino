@@ -13,6 +13,10 @@
 #include <SPI.h>
 #include <RH_RF95.h>
 
+extern "C" {
+  #include <flip.h>
+}
+
 /* DEFINES */
 #define RFM95_CS  8
 #define RFM95_RST 4
@@ -25,6 +29,8 @@ uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
 uint8_t msg[RH_RF95_MAX_MESSAGE_LEN] = "ACK" ; //PLACEHOLDER ***
 uint8_t buf_len = sizeof(buf);
 uint8_t msg_len = 4;
+char *payload;
+char bitmap[20];
 
 /* Single instance of the radio driver */
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
@@ -76,13 +82,24 @@ void lora_init(void)
 }
 
 void receivePacket(void){
-
+  int index=0;
+  char header_values[256];
+  
   if ( rf95.recv(buf, &buf_len) ){
-    Serial.print("RECEIVED: ");
-    Serial.println((char*)buf);
+    RH_RF95::printBuffer("RECEIVED: ", buf, buf_len);
     Serial.print("RSSI: ");
     Serial.println(rf95.lastRssi(), DEC);
 
+    flip_read_packet( (char *)buf, buf_len, &index);
+    get_bitmap_str( (char *)buf, bitmap, 20);
+    //add function to print header values
+    get_headervals_str(header_values, 256);
+
+    Serial.print("Bitmap: ");
+    Serial.println(bitmap);
+    Serial.print(header_values);
+    Serial.print("Payload: ");
+    Serial.println((char*) (buf + index));
     
     rf95.send((uint8_t *)msg, msg_len);
     rf95.waitPacketSent();

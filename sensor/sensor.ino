@@ -12,10 +12,8 @@
 /* LIBRARIES */
 #include <SPI.h>
 #include <RH_RF95.h>
+#include <eflip.h>
 
-extern "C" {
-  #include <flip.h>
-}
 
 /* DEFINES */
 #define RFM95_CS  8
@@ -24,7 +22,7 @@ extern "C" {
 #define RF95_FREQ 902.0
 #define RF95_PWR  5
 
-#define FLOWMETER A2
+#define FLOWMETER A1
 #define LEDPIN  13
 
 /* GLOBAL VARIABLES */
@@ -38,6 +36,7 @@ volatile uint8_t pinState;
 volatile uint8_t lastPinState;
 unsigned long current_t;
 unsigned long flowStart;
+unsigned long eventDuration;
 unsigned long pinChange;
 unsigned long lastPinChange;
 unsigned long pinDelta;
@@ -54,17 +53,41 @@ float hertz;
 bool flowing;
 bool eventStart;
 bool eventEnd;
+char logstr[100];
+int  packet_len;
+String logStr;
+char *tempPacket;
+int s;
 
 /* Single instance of the radio driver */
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
+FlipKernel network;
+
+bool toSend(uint8_t* data, uint8_t len){
+  uint8_t data_len = len;
+  return rf95.send(data, &data_len);
+}
+
+bool toRead(uint8_t* buf, uint8_t buf_len){
+  return rf95.recv(buf, buf_len);
+}
 
 void setup() {
   
-  while (!Serial);
+  //while (!Serial);
   Serial.begin(9600);
-
-  flip_init();
   lora_init();
+  
+  network.init(toSend, toRead);
+  s = network.socket();
+  
+  network.setsocketopt(s, SOCK_TYPE_FLIP, FLIP_VERSION, 1);
+  network.setsocketopt(s, SOCK_TYPE_FLIP, FLIP_DEST_1, 224);
+  network.setsocketopt(s, SOCK_TYPE_FLIP, FLIP_TTL, 4);
+  network.setsocketopt(s, SOCK_TYPE_FLIP, FLIP_SOURCE_1, 64);
+  
+  //flip_init();
+  
   sensor_init();
   manager_init();
   
@@ -179,8 +202,18 @@ void sensor_task(void){
                                 (current_t - lastPinChange) > 3000){
     flowing = false;
     eventEnd=true;
+    
+    eventDuration = current_t - flowStart - 3000;
+    String volumestr = String("L ");
+    String volumeval = String(volume, 2);
+    String durationstr = String("Sec");
+    String durationval = String( eventDuration/1000 );
+
+    logStr = volumeval + volumestr + durationval + durationstr;    
+        
     volume = 0;
     Serial.println("FLOW EVENT FINISHED");
+    Serial.println(logStr);
     digitalWrite(LEDPIN, LOW);
   }
 
@@ -208,65 +241,68 @@ void eventManager_task(void){
       Serial.print("Volume: ");
       Serial.println(volume);
 
-      //String payloadType = String('A');
-      //String volume = String(volume);
-      //String duration
-      //Serial.println(payload);
     }
   }
 
   // if an event just started, prepare notification packet
   if ( eventStart ){
     eventStart=false;
-    sendPacket++;
-
+//    sendPacket++;
+//
     Serial.println("CRAFTING START PACKET");
-    //insert header+payload code here
+//    //insert header+payload code here
     char *payload = "EVENT-START";
-    char *bitmap = FLIP_construct_bitmap();
-    char *header = FLIP_construct_header();
-    char *packet = FLIP_construct_packet(bitmap,header,payload);
-    int packet_len = get_packet_length();
-    
+//    char *bitmap = FLIP_construct_bitmap();
+//    char *header = FLIP_construct_header();
+//    
+//    //memset(packet, '\0', strlen(packet));
+//    char *packet = FLIP_construct_packet(bitmap,header,payload);
+//    packet_len = get_packet_length();
+//
+//    tempPacket=packet;
+
+    network.write(s, payload, (int) strlen(payload) );
   }
 
   //if an event just ended, prepare log packet
   if ( eventEnd ) {
     eventEnd=false;
-    sendPacket++;
+//    sendPacket++;
 
     Serial.println("CRAFTING END PACKET");
     //insert header+payload code here
-    
+//    char *bitmap = FLIP_construct_bitmap();
+//    char *header = FLIP_construct_header();
+
+//    logStr.toCharArray(logstr, 100);
+//    memset(packet, '\0', strlen(packet));
+//    char *packet = FLIP_construct_packet(bitmap,header,logstr);
+//    packet_len = get_packet_length();
+//
+//    tempPacket=packet;
+
+    char *payload = "EVENT-ENDED";
+    network.write(s, payload, (int) strlen(payload) );
   }  
 }
 
 void loraRadio_task(void){
   
-  //if packets queued for transmission, send 1
-  if ( sendPacket > 0){
-    rf95.send((uint8_t *) packet, packet_len);
-    sendPacket--;
-  
-    Serial.println("SENDING PACKET!");
-    rf95.waitPacketSent();
+//  //if packets queued for transmission, send 1
+//  if ( sendPacket > 0){
+//    rf95.send((uint8_t *) tempPacket, packet_len);
+//    sendPacket--;
+//  
+//    Serial.println("SENDING PACKET!");
+//    rf95.waitPacketSent();
+  network.kernel();
 
   //else, check if we received anything  
-  } else if (rf95.recv(buf, &buf_len)) {
-    Serial.println("RECEIVED SOMETHING!");
+  if (rf95.recv(buf, &buf_len)) {
+    Serial.print("RECEIVED SOMETHING: ");
     Serial.println((char*)buf);
   }
 }
 
-void flip_init(void){
-  
-  // STATIC socket options
-  setsockopt(FLIPO_VERSION, 14, 0);
-  setsockopt(FLIPO_DESTINATION, 100, 4);
-  setsockopt(FLIPO_SOURCE, 220, 4);
-  setsockopt(FLIPO_PROTOCOL, 1, 0);
-  setsockopt(FLIPO_TTL, 8, 0);
-  
-}
 
 
