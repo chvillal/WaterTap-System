@@ -11,7 +11,9 @@
 
 #include <Arduino.h>
 #include <stdint.h>
-#include <string>
+//#include <string>
+
+#define EVENT_TIMEOUT 3000
 
 //volatile uint8_t pinState;
 //volatile uint8_t lastPinState;
@@ -52,22 +54,51 @@ private:
     unsigned long pinChange;
     unsigned long pinDelta;
     unsigned long eventDuration;
-    unsigned long nextSerialUpdate; 
+    //unsigned long nextSerialUpdate; 
     float volume;
     float flowRate;
     float hertz;
     bool flowing;
-    bool ledEnabled;
+    //bool ledEnabled;
     bool eventStart;
     bool eventEnd;
-    
-public:
     String logStr;
-    
+	
+public:
+	//constructor
+    WaterSensor()
+	{
+		reset_event();
+		reset_metrics();
+	}
+		
     void init(uint8_t pin);
-    void enableLED(uint8_t pin);
+    //void enableLED(uint8_t pin);
     void task(unsigned long time_m);
+	
+	void reset_event(void);
+	void reset_metrics(void);
+	float get_flowRate(void) {return flowRate;};
+	float get_volume(void) {return volume;};
+	
+	bool isEventEnd(void){return eventEnd;};
+	bool isEventStart(void){return eventStart;};
+	bool isEventFlowing(void){return flowing;};
+		
+	void clrEventEnd(void){eventEnd = false;};
+	void clrEventStart(void){eventStart = false;};
+	void clrEventFlowing(void){flowing = false;};
     
-}
+};
+
+//class SensorManager {
+//private:
+	//WaterSensor sensor1;
+	//WaterSensor sensor2;
+//
+//public:
+	//
+//};
 
 #endif /* kraken_h */
+
