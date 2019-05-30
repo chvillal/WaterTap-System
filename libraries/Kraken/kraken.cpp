@@ -53,8 +53,9 @@ void WaterSensor::task(unsigned long time_m)
     if (pinState != lastPinState && pinState == HIGH){
         
         if (flowing == false){
+			volume = 0;
             flowStart = time_m;
-            Serial.println("FLOW EVENT STARTED");
+            //Serial.println("FLOW EVENT STARTED");
             lastPinChange = time_m;
             flowing = true;
             lastPinState = pinState;
@@ -90,8 +91,8 @@ void WaterSensor::task(unsigned long time_m)
         String durationval = String( eventDuration/1000 );
         logStr = volumeval + volumestr + durationval + durationstr;
         
-        volume = 0;
-        Serial.println("FLOW EVENT FINISHED");
+        //volume = 0;
+        Serial.print("FLOW EVENT FINISHED: ");
         Serial.println(logStr);
 		
         //if (ledEnabled){
